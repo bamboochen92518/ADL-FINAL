@@ -2,10 +2,10 @@ import requests
 import json
 from bs4 import BeautifulSoup
 from urllib.parse import quote
+from utils import get_stock_name_and_code
 
 # param
-stock_name=['大立光', '台積電', '聯發科']
-stock_code=['3008.TW', '2330.TW', '2454.TW']
+stock_name, stock_code = get_stock_name_and_code(41)
 page_num = 10
 
 seq_len = 1024
@@ -15,7 +15,7 @@ for comp in stock_name:
     cnt = 0
     for page in range(page_num):
         # 要抓取的網址
-        url = 'https://tw.finance.yahoo.com/news_search.html?ei=Big5&q=' + quote(comp.encode('big5')) + f'&pg={page+1}'
+        url = 'https://tw.finance.yahoo.com/news_search.html?ei=Big5&q=' + quote(comp.encode('big5hkscs')) + f'&pg={page+1}'
         print(url)
 
         try:
