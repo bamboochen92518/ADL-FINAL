@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import os
+import pandas as pd
 
 
 def get_stock_name_and_code(sectorID):
@@ -29,7 +31,6 @@ def get_stock_name_and_code(sectorID):
         stock_code.append(text_content)
     # debug
     '''
-
     for i in range(len(stock_name)):
         print(f"name = {stock_name[i]}, code = {stock_code[i]}")
     '''
@@ -40,20 +41,31 @@ def download_stock_price_csv(stock_code):
     for code in stock_code:
         url = f"https://finance.yahoo.com/quote/{code}/history?p={code}"
         print(url)
-        response = requests.get(url)
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        response = requests.get(url, headers=headers)
         if response.status_code != 200:
             print(response.status_code)
+            print(response.url)
             print(f"找不到{code}的歷史股價")
             continue
         html_content = response.text
         soup = BeautifulSoup(html_content, 'html.parser')
         # find type
         stock_price_csv_path = soup.find('a', class_= "Fl(end) Mt(3px) Cur(p)").get('href')
+        temperature_path = f'./stock_price/tmp.csv'
         destination_path = f'./stock_price/{code}.csv'
-        stock_price_csv = requests.get(stock_price_csv_path)
+        stock_price_csv = requests.get(stock_price_csv_path, headers=headers)
         if stock_price_csv.status_code == 200:
-            with open(destination_path, 'wb') as file:
+            with open(temperature_path, 'wb') as file:
                 file.write(stock_price_csv.content)
-            print(f'檔案已成功下載到 {destination_path}')
+            if os.path.exists(destination_path):
+                df_a = pd.read_csv(temperature_path)
+                df_b = pd.read_csv(destination_path)
+                df_merged = pd.concat([df_a, df_b], ignore_index=True)
+                df_merged.to_csv(destination_path, index=False)
+            else:
+                os.rename(temperature_path, destination_path)
+            os.remove(temperature_path)
         else:
-            print(f'無法下載檔案。狀態碼: {response.status_code}')
+            print(f'無法下載{code}的歷史股價。狀態碼：{stock_price_csv.status_code}')
+
