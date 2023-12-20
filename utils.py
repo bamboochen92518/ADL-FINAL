@@ -28,7 +28,32 @@ def get_stock_name_and_code(sectorID):
         text_content = div.get_text()
         stock_code.append(text_content)
     # debug
+    '''
+
     for i in range(len(stock_name)):
         print(f"name = {stock_name[i]}, code = {stock_code[i]}")
+    '''
 
     return stock_name, stock_code
+
+def download_stock_price_csv(stock_code):
+    for code in stock_code:
+        url = f"https://finance.yahoo.com/quote/{code}/history?p={code}"
+        print(url)
+        response = requests.get(url)
+        if response.status_code != 200:
+            print(response.status_code)
+            print(f"找不到{code}的歷史股價")
+            continue
+        html_content = response.text
+        soup = BeautifulSoup(html_content, 'html.parser')
+        # find type
+        stock_price_csv_path = soup.find('a', class_= "Fl(end) Mt(3px) Cur(p)").get('href')
+        destination_path = f'./stock_price/{code}.csv'
+        stock_price_csv = requests.get(stock_price_csv_path)
+        if stock_price_csv.status_code == 200:
+            with open(destination_path, 'wb') as file:
+                file.write(stock_price_csv.content)
+            print(f'檔案已成功下載到 {destination_path}')
+        else:
+            print(f'無法下載檔案。狀態碼: {response.status_code}')

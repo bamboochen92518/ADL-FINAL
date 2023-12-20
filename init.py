@@ -1,0 +1,4 @@
+from utils import download_stock_price_csv, get_stock_name_and_code
+
+target_stock_name, target_stock_code = get_stock_name_and_code(41)
+download_stock_price_csv(target_stock_code)
