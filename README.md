@@ -26,3 +26,10 @@ train data
 
 每次跑之前都先執行`python init.py`，才會更新股價。
 
+#### `add_answer.py`
+
+將 train data 的資料加上 stock_result 那欄，如果是漲 / 持平就是 1，否則就是 -1。
+
+另外將 time 的格式改為 `YYYY-MM-DD hour:minute`。
+
+最終的結果存到 `train_with_answer.json`。
