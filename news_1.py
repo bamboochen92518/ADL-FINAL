@@ -24,10 +24,10 @@ headers = {'User-Agent': ua.random}
 
 seq_len = 1024
 #請求網站
-news_list = []
-for i in range(len(stock_name)):
+for i in range(2, len(stock_name)):
     name = stock_name[i]
     code = stock_code[i]
+    news_list = []
     print(f"正在抓取「{name}」的相關新聞")
     for page in range(args.page_num):
         url = 'https://search.ltn.com.tw/list?keyword=' + quote(name.encode('utf-8')) + '&start_time=' + start_time + '&end_time=' + end_time + '&sort=date&type=business&page=' + str(page + 1)
@@ -42,8 +42,11 @@ for i in range(len(stock_name)):
         soup = BeautifulSoup(list_req.content, "html.parser")
 
         news_table = soup.find('ul', {'class': 'list boxTitle', 'data-desc': '列表'})
-        news_body = news_table.find_all('li')
-
+        # 如果查無結果的話，會抓不到任何內容，所以需要特判
+        try:
+            news_body = news_table.find_all('li')
+        except:
+            break
         for item in news_body:
             data = ['', '', '']
             cur_link = item.find('a')['href']
