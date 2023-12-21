@@ -32,4 +32,4 @@ train data
 
 另外將 time 的格式改為 `YYYY-MM-DD hour:minute`。
 
-最終的結果存到 `train_with_answer.json`。
+最終的結果存到 `train_data/{stock_code}.json`。
