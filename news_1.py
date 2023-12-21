@@ -9,7 +9,7 @@ from fake_useragent import UserAgent
 from utils import get_stock_name_and_code
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('--page_num', default=10)
+parser.add_argument('--page_num', default=50)
 parser.add_argument('--output_file', default='train.json')
 parser.add_argument('--sectorID', default=41)
 
@@ -23,7 +23,7 @@ ua = UserAgent()
 headers = {'User-Agent': ua.random}
 
 seq_len = 1024
-#請求網站
+# 請求網站
 for i in range(2, len(stock_name)):
     name = stock_name[i]
     code = stock_code[i]
@@ -54,7 +54,7 @@ for i in range(2, len(stock_name)):
             # print(cur_link, cur_title)
             data[0] = str(cur_title)
 
-            news_content = requests.get(cur_link)
+            news_content = requests.get(cur_link, headers=headers)
             soup = BeautifulSoup(news_content.content, "html.parser")
             main_txt = soup.find('div', {'class': 'text'}).find_all('p')
             pub_time = soup.find('span', {'class': 'time'}).get_text()
