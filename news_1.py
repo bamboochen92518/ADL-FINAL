@@ -8,7 +8,7 @@ import argparse
 from utils import get_stock_name_and_code
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('--page_num', default=2)
+parser.add_argument('--page_num', default=10)
 parser.add_argument('--output_file', default='train.json')
 parser.add_argument('--sectorID', default=41)
 
@@ -23,18 +23,19 @@ headers = {
 seq_len = 1024
 #請求網站
 news_list = []
-for comp in stock_name:
-    cnt = 0
+for i in range(len(stock_name)):
+    name = stock_name[i]
+    code = stock_code[i]
+    print(f"正在抓取「{name}」的相關新聞")
     for page in range(args.page_num):
-        url = 'https://search.ltn.com.tw/list?keyword=' + quote(comp.encode('utf-8')) + '&start_time=' + start_time + '&end_time=' + end_time + '&sort=date&type=business&page=' + str(page + 1)
-        
-        list_req = requests.get(url, headers=headers)
+        url = 'https://search.ltn.com.tw/list?keyword=' + quote(name.encode('utf-8')) + '&start_time=' + start_time + '&end_time=' + end_time + '&sort=date&type=business&page=' + str(page + 1)
         print(url)
-        while list_req.status_code != 200:
-            sleep(0.5)
-            list_req = requests.get(url)
-            print(url)
-
+        try:
+            list_req = requests.get(url, headers=headers)
+        except:
+            break
+        if requests.status_codes != 200:
+            break
         soup = BeautifulSoup(list_req.content, "html.parser")
 
         news_table = soup.find('ul', {'class': 'list boxTitle', 'data-desc': '列表'})
@@ -61,7 +62,10 @@ for comp in stock_name:
                     break
                 else:
                     data[1] += str(text_body)
-            news_list.append({'title': data[0], 'content': data[1], 'time': data[2], 'stock_name': comp, 'stock_code': stock_code[cnt]})
+            news_list.append({'title': data[0], 'content': data[1], 'time': data[2], 'stock_name': name, 'stock_code': code})
+            sleep(0.1)
 
-with open(args.output_file, 'w', encoding='utf-8') as json_file:
-    json.dump(news_list, json_file, indent=4, ensure_ascii=False)
+    output_file = f"./stock_news/{code}_news.json"
+    with open(output_file, 'w', encoding='utf-8') as json_file:
+        json.dump(news_list, json_file, indent=4, ensure_ascii=False)
+    sleep(0.1)
