@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import quote
 from time import sleep
 import argparse
+from fake_useragent import UserAgent
 from utils import get_stock_name_and_code
 
 parser = argparse.ArgumentParser(description='')
@@ -16,10 +17,11 @@ parser.add_argument('--sectorID', default=41)
 args = parser.parse_args()
 # param
 stock_name, stock_code = get_stock_name_and_code(args.sectorID)
-start_time, end_time = '20041201', '20231219'
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-}
+start_time, end_time = '20230101', '20231219'
+
+ua = UserAgent()
+headers = {'User-Agent': ua.random}
+
 seq_len = 1024
 #請求網站
 news_list = []
@@ -34,7 +36,8 @@ for i in range(len(stock_name)):
             list_req = requests.get(url, headers=headers)
         except:
             break
-        if requests.status_codes != 200:
+        if list_req.status_code != 200:
+            print(list_req.status_code)
             break
         soup = BeautifulSoup(list_req.content, "html.parser")
 
