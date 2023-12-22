@@ -33,3 +33,15 @@ train data
 另外將 time 的格式改為 `YYYY-MM-DD hour:minute`。
 
 最終的結果存到 `train_data/{stock_code}.json`。
+
+#### `train.py`
+
+進行 train model
+
+#### `predict.py`
+
+對 validation data 預測
+
+#### `split_data.py`
+
+將 data 分成 train data 及 validation data

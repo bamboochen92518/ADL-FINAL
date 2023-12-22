@@ -33,17 +33,17 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--model_name",
     type=str,
-    default="bardsai/finance-sentiment-zh-base",
+    default="hw2942/bert-base-chinese-finetuning-financial-news-sentiment-v2",
 )
 parser.add_argument(
     "--learning_rate",
     type=float,
-    default=3e-5,
+    default=1e-5,
 )
 parser.add_argument(
     "--epoch",
     type=int,
-    default=5,
+    default=1,
 )
 parser.add_argument(
     "--batch_size",
@@ -56,6 +56,11 @@ parser.add_argument(
     default=2,
 )
 parser.add_argument(
+    "--train_data",
+    type=str,
+    default="train.json",
+)
+parser.add_argument(
     "--output_dir",
     type=str,
     default="new_model",
@@ -64,7 +69,7 @@ args = parser.parse_args()
 
 device = torch.device("cuda")
 data_files = {}
-data_files['train'] = "train_data/2301.TW.json"
+data_files['train'] = args.train_data
 raw_datasets = load_dataset('json', data_files=data_files)
 
 config = AutoConfig.from_pretrained(
@@ -95,7 +100,8 @@ column_names = raw_datasets['train'].column_names
 
 def preprocess_function(examples):
     inputs = [
-        f'[{examples["stock_code"][i]} {examples["stock_name"][i]}] 新聞標題：{examples["title"][i]}\n時間：{examples["time"][i]}\n內文如下：\n{examples["content"][i]}'
+        f'[{examples["time"][i]}] {examples["title"][i]}\n內文如下：\n{examples["content"][i]}'
+        # examples["content"][i]
         for i in range(len(examples["content"]))
     ]
     result = tokenizer(inputs, padding="max_length", max_length=512, truncation=True)
