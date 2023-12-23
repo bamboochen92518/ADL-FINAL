@@ -2,12 +2,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, Auto
 from datasets import load_dataset
 import torch
 import argparse
-import os
 import json
-
-
-def get_title(news: dict) -> str:
-    return f'[{news["stock_code"]} {news["stock_name"]}] 新聞標題：{news["title"]}\n時間：{news["time"]}\n內文如下：\n'
 
 
 def sliding_window(news: dict):

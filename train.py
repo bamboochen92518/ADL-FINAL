@@ -9,26 +9,6 @@ import numpy as np
 # from tqdm import tqdm
 
 
-def get_title(news: dict) -> str:
-    return f'[{news["stock_code"]} {news["stock_name"]}] 新聞標題：{news["title"]}\n時間：{news["time"]}\n內文如下：\n'
-
-
-def sliding_window(news: dict):
-    # text = news["content"]
-    title = f'[{news["stock_code"]} {news["stock_name"]}] 新聞標題：{news["title"]}\n時間：{news["time"]}\n內文如下：\n'
-    text = title + news["content"]
-    window_size = 512
-    overlap = 0
-    chunks = []
-    start = 0
-    while start < len(text):
-        end = min(start + window_size, len(text))
-        # chunks.append([get_title(news) + text[start:end], end - start + 1])
-        chunks.append([text[start:end], end - start + 1])
-        start += window_size - overlap
-    return chunks
-
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--model_name",
@@ -43,7 +23,7 @@ parser.add_argument(
 parser.add_argument(
     "--epoch",
     type=int,
-    default=1,
+    default=10,
 )
 parser.add_argument(
     "--batch_size",
@@ -53,7 +33,7 @@ parser.add_argument(
 parser.add_argument(
     "--accumulation_steps",
     type=int,
-    default=2,
+    default=1,
 )
 parser.add_argument(
     "--train_data",
@@ -75,7 +55,8 @@ raw_datasets = load_dataset('json', data_files=data_files)
 config = AutoConfig.from_pretrained(
     args.model_name,
     trust_remote_code=False,
-    num_labels=3
+    num_labels=3,
+    finetuning_task="text-classification",
 )
 
 tokenizer = AutoTokenizer.from_pretrained(
@@ -92,6 +73,7 @@ model = AutoModelForSequenceClassification.from_pretrained(
     from_tf=bool(".ckpt" in args.model_name),
     config=config,
     trust_remote_code=False,
+    ignore_mismatched_sizes=True,
 )
 model.to(device)
 
@@ -105,7 +87,9 @@ def preprocess_function(examples):
         for i in range(len(examples["content"]))
     ]
     result = tokenizer(inputs, padding="max_length", max_length=512, truncation=True)
-    result["label"] = [1 - idx for idx in examples["stock_result"]]
+    result["label"] = [idx + 1 for idx in examples["stock_result"]]
+    if args.model_name == "bardsai/finance-sentiment-zh-base":
+        result["label"] = [1 - idx for idx in examples["stock_result"]]
     return result
 
 
@@ -170,6 +154,8 @@ metric = load_metric("accuracy")
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
+    print(logits)
+    print(labels)
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 
