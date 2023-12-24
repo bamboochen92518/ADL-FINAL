@@ -10,7 +10,7 @@ for i in "${accumulation_steps[@]}"; do
     for k in "${learning_rates[@]}"; do
       nohup python train.py --model_name hw2942/bert-base-chinese-finetuning-financial-news-sentiment-test --learning_rate $k --epoch $epoch --batch_size $j --accumulation_steps $i > log/hw2942_bert-base-chinese-finetuning-financial-news-sentiment-test_${k}_${j}_${epoch}_${i}.log
       nohup python train.py --model_name bardsai/finance-sentiment-zh-base --learning_rate $k --epoch $epoch --batch_size $j --accumulation_steps $i > log/bardsai_finance-sentiment-zh-base_${k}_${j}_${epoch}_${i}.log
-      nohup python train.py --model_name hw2942/chinese-bigbird-wwm-base-4096-wallstreetcn-morning-news-market-overview-open-000001SH-v1 --learning_rate $k --epoch $epoch --batch_size $j --accumulation_steps $i > log/hw2942_chinese-bigbird-wwm-base-4096-wallstreetcn-morning-news-market-overview-open-000001SH-v1_${k}_${j}_${epoch}_${i}.log
+      nohup python train_1.py --model_name hw2942/chinese-bigbird-wwm-base-4096-wallstreetcn-morning-news-market-overview-open-000001SH-v1 --learning_rate $k --epoch $epoch --batch_size $j --accumulation_steps $i > log/hw2942_chinese-bigbird-wwm-base-4096-wallstreetcn-morning-news-market-overview-open-000001SH-v1_${k}_${j}_${epoch}_${i}.log
     done
   done
 done
