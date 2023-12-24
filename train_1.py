@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import torch
 import argparse
 import numpy as np
-# import os
+import os
 # import json
 # from tqdm import tqdm
 
@@ -43,7 +43,7 @@ parser.add_argument(
 parser.add_argument(
     "--output_dir",
     type=str,
-    default="new_model",
+    default=None,
 )
 args = parser.parse_args()
 
@@ -63,6 +63,7 @@ tokenizer = AutoTokenizer.from_pretrained(
     args.model_name,
     use_fast=True,
     trust_remote_code=False,
+    max_len=2048,
     padding="max_length",
     truncation=True,
     paddind_side="left"
@@ -87,7 +88,7 @@ def preprocess_function(examples):
         for i in range(len(examples["content"]))
     ]
     result = tokenizer(inputs, padding="max_length", max_length=2048, truncation=True)
-    result["label"] = [max(1, idx) for idx in examples["stock_result"]]
+    result["label"] = [max(0, idx) for idx in examples["stock_result"]]
     return result
 
 
@@ -109,7 +110,7 @@ train_dataloader = DataLoader(
 
 num_training_steps = args.epoch * len(train_dataloader)
 
-optimizer = torch.optim.AdamW(
+optimizer = torch.optim.Adam(
         model.parameters(),
         lr=args.learning_rate
 )
@@ -137,14 +138,25 @@ for epoch in range(args.epoch):
 model.save_pretrained('new_model')
 '''
 
+if args.output_dir is None:
+    args.output_dir = f'{args.model_name}_{args.learning_rate}_{args.batch_size}_{args.epoch}_{args.accumulation_steps}'.replace('/', '_')
+
+if not os.path.isdir(args.output_dir):
+    os.mkdir(args.output_dir)
+
 train_argument = TrainingArguments(
     per_device_train_batch_size=args.batch_size,
     gradient_accumulation_steps=args.accumulation_steps,
     learning_rate=args.learning_rate,
     num_train_epochs=args.epoch,
     fp16=True,
-    report_to='none',
-    output_dir="new_model",
+    report_to='all',
+    output_dir=args.output_dir,
+    save_strategy="epoch",
+    save_steps=1,
+    logging_strategy="epoch",
+    logging_steps=1,
+    logging_dir=f'{args.output_dir}/log',
 )
 
 metric = load_metric("accuracy")
@@ -164,7 +176,7 @@ trainer = Trainer(
     data_collator=default_data_collator,
     args=train_argument,
     compute_metrics=compute_metrics,
-    optimizers=[optimizer, lr_scheduler]
+    optimizers=[optimizer, lr_scheduler],
 )
 
 trainer.train()

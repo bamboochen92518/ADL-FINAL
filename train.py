@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import torch
 import argparse
 import numpy as np
-# import os
+import os
 # import json
 # from tqdm import tqdm
 
@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--model_name",
     type=str,
-    default="hw2942/bert-base-chinese-finetuning-financial-news-sentiment-v2",
+    default="hw2942/bert-base-chinese-finetuning-financial-news-sentiment-test",
 )
 parser.add_argument(
     "--learning_rate",
@@ -43,7 +43,7 @@ parser.add_argument(
 parser.add_argument(
     "--output_dir",
     type=str,
-    default="new_model",
+    default=None,
 )
 args = parser.parse_args()
 
@@ -139,14 +139,25 @@ for epoch in range(args.epoch):
 model.save_pretrained('new_model')
 '''
 
+if args.output_dir is None:
+    args.output_dir = f'{args.model_name}_{args.learning_rate}_{args.batch_size}_{args.epoch}_{args.accumulation_steps}'.replace('/', '_')
+
+if not os.path.isdir(args.output_dir):
+    os.mkdir(args.output_dir)
+
 train_argument = TrainingArguments(
     per_device_train_batch_size=args.batch_size,
     gradient_accumulation_steps=args.accumulation_steps,
     learning_rate=args.learning_rate,
     num_train_epochs=args.epoch,
     fp16=True,
-    report_to='none',
-    output_dir="new_model",
+    report_to='all',
+    output_dir=args.output_dir,
+    save_strategy="epoch",
+    save_steps=1,
+    logging_strategy="epoch",
+    logging_steps=1,
+    logging_dir=f'{args.output_dir}/log',
 )
 
 metric = load_metric("accuracy")
@@ -154,8 +165,6 @@ metric = load_metric("accuracy")
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    print(logits)
-    print(labels)
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 
@@ -168,7 +177,7 @@ trainer = Trainer(
     data_collator=default_data_collator,
     args=train_argument,
     compute_metrics=compute_metrics,
-    optimizers=[optimizer, lr_scheduler]
+    optimizers=[optimizer, lr_scheduler],
 )
 
 trainer.train()
