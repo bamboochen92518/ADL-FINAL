@@ -114,7 +114,8 @@ valid_dataset.set_format("torch")
 
 train_dataloader = DataLoader(
     train_dataset,
-    batch_size=args.batch_size
+    batch_size=args.batch_size,
+    shuffle=True
 )
 
 num_training_steps = args.epoch * len(train_dataloader)
