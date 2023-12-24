@@ -1,9 +1,9 @@
 #!/bin/bash
 
-epoch=20
-learning_rates=(1e-5 2e-5 3e-5 4e-5 5e-5 1e-4 5e-6)
-batch_sizes=(16 8 4 2 1)
-accumulation_steps=(1 4)
+epoch=10
+learning_rates=(5e-6 1e-5 2e-5 3e-5)
+batch_sizes=(8 4 2 1)
+accumulation_steps=(1 2 4)
 
 for i in "${accumulation_steps[@]}"; do
   for j in "${batch_sizes[@]}"; do

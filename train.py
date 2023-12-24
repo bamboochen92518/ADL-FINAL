@@ -41,6 +41,11 @@ parser.add_argument(
     default="train.json",
 )
 parser.add_argument(
+    "--valid_data",
+    type=str,
+    default="valid.json",
+)
+parser.add_argument(
     "--output_dir",
     type=str,
     default=None,
@@ -50,6 +55,7 @@ args = parser.parse_args()
 device = torch.device("cuda")
 data_files = {}
 data_files['train'] = args.train_data
+data_files['valid'] = args.valid_data
 raw_datasets = load_dataset('json', data_files=data_files)
 
 config = AutoConfig.from_pretrained(
@@ -87,9 +93,9 @@ def preprocess_function(examples):
         for i in range(len(examples["content"]))
     ]
     result = tokenizer(inputs, padding="max_length", max_length=512, truncation=True)
-    result["label"] = [idx + 1 for idx in examples["stock_result"]]
+    result["label"] = [idx * 2 for idx in examples["stock_result"]]
     if args.model_name == "bardsai/finance-sentiment-zh-base":
-        result["label"] = [1 - idx for idx in examples["stock_result"]]
+        result["label"] = [2 - idx * 2 for idx in examples["stock_result"]]
     return result
 
 
@@ -103,6 +109,9 @@ raw_datasets = raw_datasets.map(
 train_dataset = raw_datasets['train']
 train_dataset = train_dataset.rename_column("label", "labels")
 train_dataset.set_format("torch")
+valid_dataset = raw_datasets['valid']
+valid_dataset = valid_dataset.rename_column("label", "labels")
+valid_dataset.set_format("torch")
 
 train_dataloader = DataLoader(
     train_dataset,
@@ -112,8 +121,8 @@ train_dataloader = DataLoader(
 num_training_steps = args.epoch * len(train_dataloader)
 
 optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=args.learning_rate
+    model.parameters(),
+    lr=args.learning_rate
 )
 lr_scheduler = get_scheduler(
     name='linear',
@@ -153,11 +162,15 @@ train_argument = TrainingArguments(
     fp16=True,
     report_to='all',
     output_dir=args.output_dir,
+    per_device_eval_batch_size=1,
     save_strategy="epoch",
     save_steps=1,
     logging_strategy="epoch",
     logging_steps=1,
     logging_dir=f'{args.output_dir}/log',
+    evaluation_strategy="epoch",
+    eval_steps=1,
+    disable_tqdm=True,
 )
 
 metric = load_metric("accuracy")
@@ -165,14 +178,20 @@ metric = load_metric("accuracy")
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-    return metric.compute(predictions=predictions, references=labels)
+    predictions = []
+    for item in logits:
+        if item[2] > item[0]:
+            predictions.append(2)
+        else:
+            predictions.append(0)
+    result = metric.compute(predictions=predictions, references=labels)
+    return result
 
 
 trainer = Trainer(
     model=model,
     train_dataset=train_dataset,
-    eval_dataset=None,
+    eval_dataset=valid_dataset,
     tokenizer=tokenizer,
     data_collator=default_data_collator,
     args=train_argument,

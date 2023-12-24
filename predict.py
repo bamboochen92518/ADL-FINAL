@@ -82,13 +82,15 @@ for data in json_data:
             logits = model(**inputs).logits
         result = torch.add(result, logits * text[1] / 512)
     predicted_class_id = result.argmax().item()
+    if result[0][2] > result[0][0]:
+        predicted_class_id = 2
+    else:
+        predicted_class_id = 0
     predict_result = model.config.id2label[predicted_class_id]
     print(result, predict_result, data['stock_result'])
     data_num += 1
     if predict_result == 'Positive' and data['stock_result'] == 1:
         correct_predict += 1
-    elif predict_result == 'Negative' and data['stock_result'] == -1:
-        correct_predict += 1
-    elif predict_result == 'Neutral' and data['stock_result'] == 0:
+    elif predict_result == 'Negative' and data['stock_result'] == 0:
         correct_predict += 1
     print(f'{correct_predict} / {data_num}')

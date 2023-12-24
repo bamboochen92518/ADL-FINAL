@@ -5,7 +5,7 @@
           "time": "2023-12-15 18:59",
           "stock_name": "承啟",
           "stock_code": "2425.TW",
-          "stock_result": -1
+          "stock_result": 0
      },
      {
           "title": "〈財經週報-熱門族群〉國際加密貨幣飆漲 板卡廠跟著起舞",
@@ -37,7 +37,7 @@
           "time": "2023-09-20 15:58",
           "stock_name": "承啟",
           "stock_code": "2425.TW",
-          "stock_result": -1
+          "stock_result": 0
      },
      {
           "title": "〈財經週報-熱門族群〉板卡廠短線修正 股價仍有表現空間",
@@ -45,7 +45,7 @@
           "time": "2023-08-28 05:30",
           "stock_name": "承啟",
           "stock_code": "2425.TW",
-          "stock_result": -1
+          "stock_result": 0
      },
      {
           "title": "強勢股》承啟 : 7月營收亮眼 輝達訂單加持",
@@ -61,6 +61,6 @@
           "time": "2023-01-03 13:45",
           "stock_name": "承啟",
           "stock_code": "2425.TW",
-          "stock_result": -1
+          "stock_result": 0
      }
 ]

@@ -5,7 +5,7 @@
           "time": "2023-10-20 18:24",
           "stock_name": "倫飛",
           "stock_code": "2364.TW",
-          "stock_result": -1
+          "stock_result": 0
      },
      {
           "title": "矽統10月18日列入處置股票",
@@ -13,7 +13,7 @@
           "time": "2023-10-18 07:10",
           "stock_name": "倫飛",
           "stock_code": "2364.TW",
-          "stock_result": -1
+          "stock_result": 0
      },
      {
           "title": "財經青紅燈》倫飛、中視大漲暗示什麼？",
@@ -21,6 +21,6 @@
           "time": "2023-09-26 05:30",
           "stock_name": "倫飛",
           "stock_code": "2364.TW",
-          "stock_result": -1
+          "stock_result": 0
      }
 ]

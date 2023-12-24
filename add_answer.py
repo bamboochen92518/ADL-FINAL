@@ -38,9 +38,7 @@ for file in os.listdir('stock_news'):
         time_stamp = f'{csv_data[idx][0]} 12:59'
         pre_result = csv_data[idx - 1][5]
         cur_result = csv_data[idx][5]
-        if pre_result > cur_result:
-            stock_result[time_stamp] = -1
-        elif pre_result == cur_result:
+        if pre_result >= cur_result:
             stock_result[time_stamp] = 0
         else:
             stock_result[time_stamp] = 1

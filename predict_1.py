@@ -68,6 +68,4 @@ for data in json_data:
         correct_predict += 1
     elif predict_result == 'Down' and data['stock_result'] == 0:
         correct_predict += 1
-    elif predict_result == 'Down' and data['stock_result'] == -1:
-        correct_predict += 1
     print(f'{correct_predict} / {data_num}')
