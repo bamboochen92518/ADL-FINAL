@@ -1,7 +1,7 @@
 #!/bin/bash
 
 epoch=10
-learning_rates=(5e-6 1e-5 2e-5 3e-5)
+learning_rates=(5e-06 1e-05 2e-05 3e-05)
 batch_sizes=(8 4 2 1)
 accumulation_steps=(1 2 4)
 
