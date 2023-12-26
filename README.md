@@ -5,16 +5,16 @@
 ```bash
 $ python init.py
 $ python train.py --model_name {model_name}\
-									--learning_rate {learning_rate}\
-									--epoch {epoch}\
-									--batch_size {batch_size}\
-									--accumulation_steps {accumulation_steps}\
-									--train_data {train_data}\
-									--valid_data {valid_data}\
-									--output_dir {output_dir}
+                  --learning_rate {learning_rate}\
+                  --epoch {epoch}\
+                  --batch_size {batch_size}\
+                  --accumulation_steps {accumulation_steps}\
+                  --train_data {train_data}\
+                  --valid_data {valid_data}\
+                  --output_dir {output_dir}
 $ python predict.py --model_name {model_name}\
-										--base_model {base_model}\
-										--valid_data {valid_data}\
+                    --base_model {base_model}\
+                    --valid_data {valid_data}\
 ```
 
 ### File
@@ -70,3 +70,7 @@ There are many `{stock code}_news.json` in it, which includes the news of that c
 #### stock_price
 
 There are many `{stock code}.csv` in it, which includes the stock price of that company or stock. 
+
+#### stock_data
+
+There are many `{stock code}.json` in it, which includes the news and label of that company or stock. 
