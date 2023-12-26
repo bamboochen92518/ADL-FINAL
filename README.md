@@ -1,47 +1,72 @@
 # ADL FINAL 透過財金新聞預測股價漲跌
 
-#### `news.py`
+### How to run
 
-爬新聞，將新聞存入`train.json`
+```bash
+$ python init.py
+$ python train.py --model_name {model_name}\
+									--learning_rate {learning_rate}\
+									--epoch {epoch}\
+									--batch_size {batch_size}\
+									--accumulation_steps {accumulation_steps}\
+									--train_data {train_data}\
+									--valid_data {valid_data}\
+									--output_dir {output_dir}
+$ python predict.py --model_name {model_name}\
+										--base_model {base_model}\
+										--valid_data {valid_data}\
+```
+
+### File
+
+#### `init.py`
+
+Initialize or update stock price and financial news that you interested. 
 
 #### `utils.py`
 
 `get_stock_name_and_code(sectorID)`
 
-透過`sectorID`抓取該類別的所有台股及其編號
+Get all the stock name and code with `sectorID`. 
 
-`download_stock_price(stock_code)`
+`download_stock_price_csv(stock_code)`
 
-`stock_code`是一個list，下載list裡面的stock code所對應的歷史股價
+Download history stock price with stock code in the list. 
 
-檔案會存在`stock_price`這個資料夾裡面，如果檔案不存在會創建新的csv檔，檔案存在會append新的資料。
+`get_news_from_yahoo(sectorID)`
 
-我們只看收盤價，所以拿`Adj Close`那欄的資料即可。
+Download financial news from yahoo news with `sectorID`. 
+
+`get_news_from_ltn(sectorID)`
+
+Download financial news from Liberty  News with `sectorID`. 
+
+`get_news_from_ettoday(sectorID)`
+
+Download financial news from ettoday with `sectorID`. 
 
 #### `train.json`
 
-train data
+Train data
 
-#### `init.py`
+#### `valid.json`
 
-每次跑之前都先執行`python init.py`，才會更新股價。
-
-#### `add_answer.py`
-
-將 train data 的資料加上 stock_result 那欄，如果是漲 / 持平就是 1，否則就是 -1。
-
-另外將 time 的格式改為 `YYYY-MM-DD hour:minute`。
-
-最終的結果存到 `train_data/{stock_code}.json`。
+Validation data
 
 #### `train.py`
 
-進行 train model
+Train model, the arguments are shown in `How to run`. 
 
 #### `predict.py`
 
-對 validation data 預測
+Predict result, the arguments are shown in `How to run`. 
 
-#### `split_data.py`
+### directory
 
-將 data 分成 train data 及 validation data
+#### stock_news
+
+There are many `{stock code}_news.json` in it, which includes the news of that company or stock. 
+
+#### stock_price
+
+There are many `{stock code}.csv` in it, which includes the stock price of that company or stock. 
