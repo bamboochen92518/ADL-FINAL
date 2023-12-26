@@ -11,10 +11,12 @@ $ python train.py --model_name {model_name}\
                   --accumulation_steps {accumulation_steps}\
                   --train_data {train_data}\
                   --valid_data {valid_data}\
-                  --output_dir {output_dir}
+                  --output_dir {output_dir}\
+                  --max_seq_len {max_seq_len}
 $ python predict.py --model_name {model_name}\
                     --base_model {base_model}\
                     --valid_data {valid_data}\
+                    --max_seq_len {max_seq_len}
 ```
 
 ### File
