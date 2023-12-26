@@ -92,7 +92,7 @@ def get_news_from_yahoo(sectorID):
         page = 0
         while True:
             url = 'https://tw.finance.yahoo.com/news_search.html?ei=Big5&q=' + quote(comp.encode('big5hkscs')) + f'&pg={page+1}'
-            #rint(url)
+            # print(url)
 
             try:
                 list_req = requests.get(url)
@@ -147,10 +147,10 @@ def get_news_from_yahoo(sectorID):
                     "stock_code": stock_code[cnt]
                 })
             page += 1
+        output_file = f"./stock_news/{stock_code[cnt]}_news.json"
+        with open(output_file, 'w', encoding='utf-8') as json_file:
+            json.dump(news_list, json_file, indent=4, ensure_ascii=False)
         cnt += 1
-
-    with open('train.json', 'w', encoding='utf-8') as json_file:
-        json.dump(news_list, json_file, indent=4, ensure_ascii=False)
 
 
 def get_news_from_ltn(sectorID, start_time, end_time):
@@ -168,10 +168,12 @@ def get_news_from_ltn(sectorID, start_time, end_time):
         while True:
             url = 'https://search.ltn.com.tw/list?keyword=' + quote(name.encode('utf-8')) + '&start_time=' + start_time + '&end_time=' + end_time + '&sort=date&type=business&page=' + str(page + 1)
             print(url)
+
             try:
                 list_req = requests.get(url, headers=headers)
             except:
                 break
+
             if list_req.status_code != 200:
                 # print(list_req.status_code)
                 break
@@ -288,7 +290,7 @@ def get_news_from_ettoday(sectorID):
                 sleep(0.1)
             page += 1
 
-        output_file = f"./ettoday_stock_news/{code}_news.json"
+        output_file = f"./stock_news/{code}_news.json"
         with open(output_file, 'w', encoding='utf-8') as json_file:
             json.dump(news_list, json_file, indent=4, ensure_ascii=False)
         sleep(0.1)
