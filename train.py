@@ -3,7 +3,6 @@ from datasets import load_dataset, load_metric
 from torch.utils.data import DataLoader
 import torch
 import argparse
-import numpy as np
 import os
 # import json
 # from tqdm import tqdm
@@ -50,6 +49,11 @@ parser.add_argument(
     type=str,
     default=None,
 )
+parser.add_argument(
+    "--max_seq_len",
+    type=int,
+    default=512,
+)
 args = parser.parse_args()
 
 device = torch.device("cuda")
@@ -58,10 +62,14 @@ data_files['train'] = args.train_data
 data_files['valid'] = args.valid_data
 raw_datasets = load_dataset('json', data_files=data_files)
 
+num_labels = 2
+if args.model_name == 'hw2942/bert-base-chinese-finetuning-financial-news-sentiment-test':
+    num_labels = 3
+
 config = AutoConfig.from_pretrained(
     args.model_name,
     trust_remote_code=False,
-    num_labels=3,
+    num_labels=num_labels,
     finetuning_task="text-classification",
 )
 
@@ -69,6 +77,7 @@ tokenizer = AutoTokenizer.from_pretrained(
     args.model_name,
     use_fast=True,
     trust_remote_code=False,
+    max_len=args.max_seq_len,
     padding="max_length",
     truncation=True,
     paddind_side="left"
@@ -89,13 +98,12 @@ column_names = raw_datasets['train'].column_names
 def preprocess_function(examples):
     inputs = [
         f'[{examples["time"][i]}] {examples["title"][i]}\n內文如下：\n{examples["content"][i]}'
-        # examples["content"][i]
         for i in range(len(examples["content"]))
     ]
-    result = tokenizer(inputs, padding="max_length", max_length=512, truncation=True)
-    result["label"] = [idx * 2 for idx in examples["stock_result"]]
-    if args.model_name == "bardsai/finance-sentiment-zh-base":
-        result["label"] = [2 - idx * 2 for idx in examples["stock_result"]]
+    result = tokenizer(inputs, padding="max_length", max_length=args.max_seq_len, truncation=True)
+    result["label"] = [idx for idx in examples["stock_result"]]
+    if args.model_name == 'hw2942/bert-base-chinese-finetuning-financial-news-sentiment-test':
+        result["label"] = [idx * 2 for idx in examples["stock_result"]]
     return result
 
 
@@ -171,7 +179,7 @@ train_argument = TrainingArguments(
     logging_dir=f'{args.output_dir}/log',
     evaluation_strategy="epoch",
     eval_steps=1,
-    disable_tqdm=True,
+    # disable_tqdm=True,
 )
 
 metric = load_metric("accuracy")
@@ -180,11 +188,19 @@ metric = load_metric("accuracy")
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = []
-    for item in logits:
-        if item[2] > item[0]:
-            predictions.append(2)
-        else:
-            predictions.append(0)
+    if args.model_name == 'hw2942/bert-base-chinese-finetuning-financial-news-sentiment-test':
+        for item in logits:
+            if item[2] > item[0]:
+                predictions.append(2)
+            else:
+                predictions.append(0)
+    else:
+        for item in logits:
+            if item[1] > item[0]:
+                predictions.append(1)
+            else:
+                predictions.append(0)
+
     result = metric.compute(predictions=predictions, references=labels)
     return result
 
