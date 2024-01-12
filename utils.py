@@ -65,7 +65,7 @@ def download_stock_price_csv(stock_code):
         # find type
         stock_price_csv_path = soup.find('a', class_="Fl(end) Mt(3px) Cur(p)").get('href')
         temperature_path = './stock_price/tmp.csv'
-        destination_path = './stock_price/{code}.csv'
+        destination_path = f'./stock_price/{code}.csv'
         stock_price_csv = requests.get(stock_price_csv_path, headers=headers)
 
         if stock_price_csv.status_code == 200:
@@ -75,10 +75,11 @@ def download_stock_price_csv(stock_code):
                 df_a = pd.read_csv(temperature_path)
                 df_b = pd.read_csv(destination_path)
                 df_merged = pd.concat([df_a, df_b], ignore_index=True)
+                df_merged.drop_duplicates(inplace=True)
                 df_merged.to_csv(destination_path, index=False)
+                os.remove(temperature_path)
             else:
                 os.rename(temperature_path, destination_path)
-            os.remove(temperature_path)
         else:
             print(f'無法下載{code}的歷史股價。狀態碼：{stock_price_csv.status_code}')
 
