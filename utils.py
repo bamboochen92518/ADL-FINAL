@@ -76,11 +76,7 @@ def download_stock_price_csv(stock_code):
                 df_a = pd.read_csv(destination_path)
                 df_b = pd.read_csv(temperature_path)
                 df_merged = pd.concat([df_a, df_b], ignore_index=True)
-<<<<<<< HEAD
                 df_merged.drop_duplicates(subset=['Date'], keep='last', inplace=True)
-=======
-                df_merged.drop_duplicates(inplace=True)
->>>>>>> 1579b57cadc45f22d039dd8be9c38020df2d2f07
                 df_merged.to_csv(destination_path, index=False)
                 os.remove(temperature_path)
             else:
