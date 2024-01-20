@@ -9,6 +9,7 @@ from fake_useragent import UserAgent
 import csv
 from bisect import bisect_right
 from tqdm import tqdm
+from prettytable import PrettyTable
 
 
 def get_stock_name_and_code(sectorID):
@@ -47,6 +48,46 @@ def get_stock_name_and_code(sectorID):
 
     return stock_name, stock_code
 
+def list_sectorID():
+    stock_type_dict = dict()
+    url = "https://tw.stock.yahoo.com/class"
+    response = requests.get(url)
+    if response.status_code != 200:
+        print("ERROR")
+        return
+    html_content = response.text
+    soup = BeautifulSoup(html_content, 'html.parser')
+    # find stock type and ID
+    target_a = soup.find_all('a', class_='Fz(16px) Lh(1.5) C($c-link-text) C($c-active-text):h Fw(b):h Td(n)')
+    for a in target_a:
+        stock_type = a.get_text()
+        href_text = a.get('href')  # 格式：/class-quote?sectorId={sectorID}&exchange=TAI, TAT 代表上市
+        if 'exchange=TAI' in href_text:
+            sectorID = int(href_text.split('=')[1].split('&')[0])
+            stock_type_dict[sectorID] = stock_type
+
+    stock_type_dict = dict(sorted(stock_type_dict.items()))
+    counter = 0
+    line = 6
+    data = list()
+    tmp = list()
+    for k in stock_type_dict.keys():
+        tmp.append(k)
+        tmp.append(stock_type_dict[k])
+        counter += 1
+        if counter == line:
+            data.append(tmp)
+            tmp = list()
+            counter = 0
+    if counter != 0:
+        for i in range(line - counter):
+            tmp.append("")
+        data.append(tmp)
+    table = PrettyTable(header=False, border=False, align='l')
+    table.add_rows(data)
+
+    print(table)
+    return
 
 def download_stock_price_csv(stock_code):
     for code in tqdm(stock_code, total=len(stock_code), desc='Downloading stock price'):
@@ -84,6 +125,13 @@ def download_stock_price_csv(stock_code):
         else:
             print(f'無法下載{code}的歷史股價。狀態碼：{stock_price_csv.status_code}')
 
+def write_news(output_file, news_list):
+    with open(output_file, 'r') as json_file:
+        data_list_of_dict = json.load(json_file)
+    news_list = news_list + data_list_of_dict
+    with open(output_file, 'w', encoding='utf-8') as json_file:
+        json.dump(news_list, json_file, indent=4, ensure_ascii=False)
+    return
 
 def get_news_from_yahoo(sectorID):
     stock_name, stock_code = get_stock_name_and_code(sectorID)
@@ -150,8 +198,7 @@ def get_news_from_yahoo(sectorID):
                 })
             page += 1
         output_file = f"./stock_news/{stock_code[cnt]}_news.json"
-        with open(output_file, 'w', encoding='utf-8') as json_file:
-            json.dump(news_list, json_file, indent=4, ensure_ascii=False)
+        write_news(output_file, news_list)
         cnt += 1
 
 
@@ -222,8 +269,7 @@ def get_news_from_ltn(sectorID, start_time, end_time):
             page += 1
 
         output_file = f"./stock_news/{code}_news.json"
-        with open(output_file, 'w', encoding='utf-8') as json_file:
-            json.dump(news_list, json_file, indent=4, ensure_ascii=False)
+        write_news(output_file, news_list)
         sleep(0.1)
 
 
@@ -293,8 +339,7 @@ def get_news_from_ettoday(sectorID):
             page += 1
 
         output_file = f"./stock_news/{code}_news.json"
-        with open(output_file, 'w', encoding='utf-8') as json_file:
-            json.dump(news_list, json_file, indent=4, ensure_ascii=False)
+        write_news(output_file, news_list)
         sleep(0.1)
 
 
